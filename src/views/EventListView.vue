@@ -1,10 +1,12 @@
 <script setup>
+import { useRouter } from 'vue-router';
 import EventCard from '@/components/EventCard.vue';
 import EventService from '@/services/EventService.js';
 import { onMounted, ref, computed, watchEffect } from 'vue';
 
 const props = defineProps(['page'])
 const events = ref(null)
+const router = useRouter()
 const totalEvents = ref(0)
 const page = computed(() => props.page)
 const hasNextPages = computed(() => {
@@ -22,7 +24,12 @@ onMounted(() => {
         totalEvents.value = response.headers['x-total-count']
       })
       .catch((error) => {
-        console.log('error', error);
+        if (error.response && error.response.status == 404) {
+          console.log('error', error);
+          router.push({ name: '404-resource', params: { resource: "events" } }) 
+        } else {
+          router.push({ name: "network-error" });
+        }
       })
   })
 })
